@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Capsule — Personal Journal</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Courier+Prime&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* --- THEME DEFINITIONS --- */
+    :root, [data-theme="teddy"] {
+      --bg-main: #FDF8F3;
+      --bg-sidebar: #F5E6D3;
+      --bg-footer: #EAD2B7;
+      --bg-card: #FFFFFF;
+      --text-main: #4A321F;
+      --text-muted: #8C6D53;
+      --accent: #9C5A25;
+      --accent-hover: #7C4418;
+      --border-color: #E3C9AC;
+      --watermark: "🧸";
+    }
+
+    [data-theme="harrypotter"] {
+      --bg-main: #F8F3E6;
+      --bg-sidebar: #2A080C;
+      --bg-footer: #1D0508;
+      --bg-card: #FFFDF7;
+      --text-main: #2B1B17;
+      --text-muted: #7C6652;
+      --accent: #B8860B;
+      --accent-hover: #996F06;
+      --border-color: #D4AF37;
+      --sidebar-text: #F5E6C4;
+      --sidebar-muted: #C9B182;
+      --watermark: "⚡";
+    }
+
+    [data-theme="football"] {
+      --bg-main: #F2F9F3;
+      --bg-sidebar: #D8F0DC;
+      --bg-footer: #C0E6C6;
+      --bg-card: #FFFFFF;
+      --text-main: #14361D;
+      --text-muted: #497554;
+      --accent: #15803D;
+      --accent-hover: #166534;
+      --border-color: #A7D9B0;
+      --watermark: "⚽";
+    }
+
+    [data-theme="doraemon"] {
+      --bg-main: #F0F8FF;
+      --bg-sidebar: #D6ECFF;
+      --bg-footer: #BCE0FF;
+      --bg-card: #FFFFFF;
+      --text-main: #0C3559;
+      --text-muted: #4B79A1;
+      --accent: #0095D9;
+      --accent-hover: #0077B3;
+      --border-color: #A3D5FF;
+      --watermark: "🔔";
+    }
+
+    [data-theme="shinchan"] {
+      --bg-main: #FFFDF0;
+      --bg-sidebar: #FFE8E8;
+      --bg-footer: #FFD1D1;
+      --bg-card: #FFFFFF;
+      --text-main: #3B1818;
+      --text-muted: #8A4F4F;
+      --accent: #E11D48;
+      --accent-hover: #BE123C;
+      --border-color: #FECDD3;
+      --watermark: "🖍️";
+    }
+
+    [data-theme="marvel"] {
+      --bg-main: #F7F7F8;
+      --bg-sidebar: #18181B;
+      --bg-footer: #09090B;
+      --bg-card: #FFFFFF;
+      --text-main: #18181B;
+      --text-muted: #71717A;
+      --accent: #DC2626;
+      --accent-hover: #B91C1C;
+      --border-color: #E4E4E7;
+      --sidebar-text: #FAFAFA;
+      --sidebar-muted: #A1A1AA;
+      --watermark: "🦸";
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .serif { font-family: 'Newsreader', Georgia, serif; }
+    .bg-main { background-color: var(--bg-main); }
+    .bg-sidebar { background-color: var(--bg-sidebar); color: var(--sidebar-text, var(--text-main)); }
+    .bg-footer { background-color: var(--bg-footer); color: var(--sidebar-text, var(--text-main)); }
+    .bg-card { background-color: var(--bg-card); color: var(--text-main); }
+    .text-main { color: var(--text-main); }
+    .text-muted { color: var(--text-muted); }
+    .sidebar-muted { color: var(--sidebar-muted, var(--text-muted)); }
+    .border-theme { border-color: var(--border-color); }
+    .btn-accent { background-color: var(--accent); color: #FFFFFF; }
+    .btn-accent:hover { background-color: var(--accent-hover); }
+
+    .canvas-watermark::after {
+      content: var(--watermark);
+      position: fixed;
+      bottom: 5.5rem;
+      left: 2.5rem;
+      font-size: 3.5rem;
+      opacity: 0.14;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    [contenteditable]:empty:before {
+      content: attr(data-placeholder);
+      color: var(--text-muted);
+      opacity: 0.55;
+      pointer-events: none;
+      display: block;
+    }
+
+    /* Interactive Checklist Item */
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin: 0.45rem 0;
+    }
+    .todo-item input[type="checkbox"] {
+      width: 1.15em;
+      height: 1.15em;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .todo-item .todo-text {
+      flex: 1;
+      outline: none;
+      min-width: 10px;
+    }
+    .todo-item.checked .todo-text {
+      text-decoration: line-through;
+      opacity: 0.55;
+    }
+
+    /* Inserted Images inside Journal */
+    #entry-body img {
+      max-width: 100%;
+      max-height: 360px;
+      border-radius: 0.85rem;
+      margin: 1rem 0;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col">
+
+  <!-- PIN LOCK / SETUP SCREEN -->
+  <div id="lock-screen" class="fixed inset-0 z-50 bg-main flex items-center justify-center p-6">
+    <div class="max-w-sm w-full bg-card border border-theme rounded-2xl p-8 shadow-sm text-center">
+      <div class="inline-flex items-center justify-center px-3.5 py-1.5 rounded-xl btn-accent mx-auto mb-4 font-bold text-sm tracking-wide">
+        THE CAPSULE
+      </div>
+      <h1 id="lock-title" class="serif text-2xl font-medium text-main mb-1">Welcome Back</h1>
+      <p id="lock-subtitle" class="text-xs text-muted mb-6">Enter your PIN to open The Capsule</p>
+
+      <div id="setup-fields" class="hidden space-y-3 mb-4 text-left">
+        <div>
+          <label class="text-[11px] font-medium text-muted">Your Name</label>
+          <input id="setup-name" type="text" placeholder="e.g. Sneha" class="w-full mt-1 border border-theme rounded-lg px-3 py-2 text-sm bg-main focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-[11px] font-medium text-muted">Your Gmail (Profile Label)</label>
+          <input id="setup-email" type="email" placeholder="you@gmail.com" class="w-full mt-1 border border-theme rounded-lg px-3 py-2 text-sm bg-main focus:outline-none" />
+        </div>
+      </div>
+
+      <input id="pin-input" type="password" maxlength="6" placeholder="••••" class="w-full text-center tracking-[0.5em] text-xl font-semibold border border-theme rounded-xl py-3 mb-4 bg-main focus:outline-none" />
+      
+      <button id="unlock-btn" class="w-full btn-accent font-medium py-3 rounded-xl transition cursor-pointer">
+        Open Capsule
+      </button>
+      <p id="lock-error" class="text-xs text-red-600 mt-3 hidden">Incorrect PIN. Try again.</p>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app-shell" class="hidden flex-1 flex h-full overflow-hidden">
+
+    <!-- LEFT: EDITOR CANVAS -->
+    <main class="flex-1 flex flex-col h-full bg-main overflow-hidden relative canvas-watermark">
+      <header class="h-14 border-b border-theme px-8 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="font-bold tracking-wider text-xs uppercase px-2.5 py-1 rounded-md btn-accent">The Capsule</span>
+          <span class="text-xs text-muted">•</span>
+          <span id="entry-date" class="text-xs text-muted"></span>
+          <span class="text-xs text-muted">•</span>
+          <span id="save-status" class="text-xs font-medium" style="color: var(--accent);">Saved locally</span>
+        </div>
+
+        <button id="delete-entry-btn" class="text-xs text-red-600 hover:bg-red-500/10 px-3 py-1.5 rounded-lg font-medium transition cursor-pointer">
+          Delete Capsule
+        </button>
+      </header>
+
+      <div class="flex-1 overflow-y-auto px-8 py-10" id="writing-scroll-area">
+        <div class="max-w-2xl mx-auto">
+          <input id="entry-title" type="text" placeholder="Give this capsule a title..." class="serif w-full text-4xl font-medium bg-transparent border-none focus:outline-none text-main mb-6" />
+          <div id="entry-body" contenteditable="true" data-placeholder="Write your thoughts, memories, or lists here..." class="leading-relaxed text-main focus:outline-none min-h-[55vh]" style="font-family: 'Newsreader', Georgia, serif; font-size: 18px;"></div>
+        </div>
+      </div>
+
+      <!-- BOTTOM WRITING TOOLBAR -->
+      <div class="border-t border-theme bg-card/90 backdrop-blur px-6 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0 z-10">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex items-center gap-1.5">
+            <label for="font-family-select" class="text-[11px] font-medium text-muted">Font</label>
+            <select id="font-family-select" class="bg-main border border-theme rounded-lg px-2.5 py-1.5 text-xs text-main focus:outline-none cursor-pointer">
+              <option value="'Newsreader', Georgia, serif">Classic Serif</option>
+              <option value="'Plus Jakarta Sans', sans-serif">Clean Sans</option>
+              <option value="'Caveat', cursive">Cute Handwritten</option>
+              <option value="'Courier Prime', monospace">Typewriter</option>
+              <option value="'Space Mono', monospace">Modern Mono</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <label for="font-size-select" class="text-[11px] font-medium text-muted">Size</label>
+            <select id="font-size-select" class="bg-main border border-theme rounded-lg px-2 py-1.5 text-xs text-main focus:outline-none cursor-pointer">
+              <option value="15px">Small</option>
+              <option value="18px" selected>Medium</option>
+              <option value="21px">Large</option>
+              <option value="25px">Extra Large</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <button id="add-checkbox-btn" type="button" class="flex items-center gap-1.5 bg-main border border-theme hover:opacity-80 text-main px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer">
+            <span>☑️</span> Checkbox
+          </button>
+
+          <label class="flex items-center gap-1.5 btn-accent px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer shadow-sm">
+            <span>🖼️</span> Insert Image
+            <input id="insert-image-input" type="file" accept="image/*" class="hidden" />
+          </label>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT: SIDEBAR LIBRARY -->
+    <aside class="w-80 bg-sidebar border-l border-theme flex flex-col h-full shrink-0 transition-colors">
+      <div class="p-5 border-b border-theme flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div id="today-date-badge" class="px-2.5 py-1 rounded-lg btn-accent font-bold text-xs tracking-wide shadow-sm">
+            7-Nov
+          </div>
+          <span class="serif font-semibold text-lg">My Library</span>
+        </div>
+        <button id="new-entry-btn" class="btn-accent text-xs font-medium px-3 py-1.5 rounded-lg transition cursor-pointer">
+          + New
+        </button>
+      </div>
+
+      <div class="p-4 border-b border-theme space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-semibold uppercase tracking-wider sidebar-muted">Choose Vibe</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 text-xs">
+          <button data-set-theme="teddy" class="theme-btn px-2 py-1.5 rounded-lg bg-card text-main border border-theme font-medium hover:opacity-90 cursor-pointer">🧸 Teddy</button>
+          <button data-set-theme="harrypotter" class="theme-btn px-2 py-1.5 rounded-lg bg-card text-main border border-theme font-medium hover:opacity-90 cursor-pointer">⚡ Potter</button>
+          <button data-set-theme="football" class="theme-btn px-2 py-1.5 rounded-lg bg-card text-main border border-theme font-medium hover:opacity-90 cursor-pointer">⚽ Football</button>
+          <button data-set-theme="doraemon" class="theme-btn px-2 py-1.5 rounded-lg bg-card text-main border border-theme font-medium hover:opacity-90 cursor-pointer">🔔 Doraemon</button>
+          <button data-set-theme="shinchan" class="theme-btn px-2 py-1.5 rounded-lg bg-card text-main border border-theme font-medium hover:opacity-90 cursor-pointer">🖍️ Shinchan</button>
+          <button data-set-theme="marvel" class="theme-btn px-2 py-1.5 rounded-lg bg-card text-main border border-theme font-medium hover:opacity-90 cursor-pointer">🦸 Marvel</button>
+        </div>
+      </div>
+
+      <div class="p-4 border-b border-theme">
+        <input id="search-input" type="text" placeholder="Search your capsules..." class="w-full bg-card border border-theme rounded-lg px-3 py-2 text-sm text-main focus:outline-none" />
+      </div>
+
+      <div id="entries-list" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+
+      <div class="p-4 border-t border-theme bg-footer space-y-3 transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="truncate">
+            <p id="profile-name" class="text-xs font-semibold truncate"></p>
+            <p id="profile-email" class="text-[11px] sidebar-muted truncate"></p>
+          </div>
+          <button id="lock-now-btn" class="text-xs bg-card border border-theme text-main px-2.5 py-1 rounded-lg font-medium cursor-pointer">
+            Lock
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <button id="export-btn" class="flex-1 text-[11px] btn-accent py-1.5 rounded-lg font-medium cursor-pointer">
+            ↓ Backup File
+          </button>
+          <label class="flex-1 text-center text-[11px] bg-card border border-theme text-main py-1.5 rounded-lg font-medium cursor-pointer">
+            ↑ Restore
+            <input id="import-input" type="file" accept=".json" class="hidden" />
+          </label>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    // --- LIVE PRESENT DATE BADGE ---
+    function setTodayBadge() {
+      const now = new Date();
+      const day = now.getDate();
+      const month = now.toLocaleDateString("en-US", { month: "short" });
+      document.getElementById("today-date-badge").textContent = `${day}-${month}`;
+    }
+    setTodayBadge();
+
+    // --- THEME MANAGEMENT ---
+    function applyTheme(themeName) {
+      document.documentElement.setAttribute("data-theme", themeName);
+      localStorage.setItem("capsule_theme", themeName);
+      document.querySelectorAll(".theme-btn").forEach(btn => {
+        btn.style.outline = btn.dataset.setTheme === themeName ? "2px solid var(--accent)" : "none";
+      });
+    }
+    applyTheme(localStorage.getItem("capsule_theme") || "teddy");
+
+    document.querySelectorAll("[data-set-theme]").forEach(btn => {
+      btn.onclick = () => applyTheme(btn.dataset.setTheme);
+    });
+
+    // --- INDEXEDDB SETUP ---
+    const DB_NAME = "TheCapsuleJournalDB";
+    const STORE_NAME = "entries";
+    let db;
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const database = e.target.result;
+          if (!database.objectStoreNames.contains(STORE_NAME)) {
+            database.createObjectStore(STORE_NAME, { keyPath: "id" });
+          }
+        };
+        req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+        req.onerror = (e) => reject(e);
+      });
+    }
+
+    function dbGetAll() {
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = () => resolve(req.result.sort((a, b) => b.updatedAt - a.updatedAt));
+      });
+    }
+
+    function dbPut(entry) {
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        tx.objectStore(STORE_NAME).put(entry);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
+    function dbDelete(id) {
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
+    // --- APP STATE & PIN AUTH ---
+    let entries = [];
+    let activeEntryId = null;
+    let saveTimer = null;
+
+    const savedProfile = JSON.parse(localStorage.getItem("folio_profile") || "null");
+    const isFirstTime = !savedProfile;
+
+    if (isFirstTime) {
+      document.getElementById("lock-title").textContent = "Create Your Capsule";
+      document.getElementById("lock-subtitle").textContent = "Set a private PIN to lock your personal diary";
+      document.getElementById("setup-fields").classList.remove("hidden");
+      document.getElementById("unlock-btn").textContent = "Create & Open Capsule";
+    } else {
+      document.getElementById("lock-title").textContent = `Welcome back, ${savedProfile.name}`;
+    }
+
+    async function handleUnlock() {
+      const pin = document.getElementById("pin-input").value.trim();
+      if (pin.length < 4) {
+        showLockError("Please enter at least a 4-digit PIN.");
+        return;
+      }
+
+      if (isFirstTime) {
+        const name = document.getElementById("setup-name").value.trim() || "My Capsule";
+        const email = document.getElementById("setup-email").value.trim() || "Private Local Library";
+        const profile = { name, email, pin };
+        localStorage.setItem("folio_profile", JSON.stringify(profile));
+        startApp(profile);
+      } else {
+        if (pin === savedProfile.pin) {
+          startApp(savedProfile);
+        } else {
+          showLockError("Incorrect PIN. Try again.");
+        }
+      }
+    }
+
+    function showLockError(msg) {
+      const el = document.getElementById("lock-error");
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+
+    document.getElementById("unlock-btn").onclick = handleUnlock;
+    document.getElementById("pin-input").onkeydown = (e) => { if (e.key === "Enter") handleUnlock(); };
+    document.getElementById("lock-now-btn").onclick = () => location.reload();
+
+    async function startApp(profile) {
+      document.getElementById("lock-screen").classList.add("hidden");
+      document.getElementById("app-shell").classList.remove("hidden");
+      document.getElementById("profile-name").textContent = profile.name;
+      document.getElementById("profile-email").textContent = profile.email;
+
+      await initDB();
+      entries = await dbGetAll();
+      if (entries.length === 0) {
+        await createNewEntry();
+      } else {
+        selectEntry(entries[0].id);
+      }
+    }
+
+    async function createNewEntry() {
+      const newEntry = {
+        id: Date.now().toString(),
+        title: "",
+        body: "",
+        fontFamily: "'Newsreader', Georgia, serif",
+        fontSize: "18px",
+        createdAt: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        updatedAt: Date.now()
+      };
+      await dbPut(newEntry);
+      entries = await dbGetAll();
+      selectEntry(newEntry.id);
+    }
+
+    const entryTitle = document.getElementById("entry-title");
+    const entryBody = document.getElementById("entry-body");
+    const fontFamilySelect = document.getElementById("font-family-select");
+    const fontSizeSelect = document.getElementById("font-size-select");
+
+    function selectEntry(id) {
+      activeEntryId = id;
+      const entry = entries.find(e => e.id === id);
+      if (!entry) return;
+      entryTitle.value = entry.title;
+      entryBody.innerHTML = entry.body;
+      document.getElementById("entry-date").textContent = entry.createdAt;
+
+      const family = entry.fontFamily || "'Newsreader', Georgia, serif";
+      const size = entry.fontSize || "18px";
+      entryBody.style.fontFamily = family;
+      entryBody.style.fontSize = size;
+      fontFamilySelect.value = family;
+      fontSizeSelect.value = size;
+
+      renderEntriesList();
+    }
+
+    function scheduleAutoSave() {
+      document.getElementById("save-status").textContent = "Saving...";
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        const existing = entries.find(e => e.id === activeEntryId);
+        if (!existing) return;
+
+        entryBody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          if (cb.checked) cb.setAttribute("checked", "checked");
+          else cb.removeAttribute("checked");
+        });
+
+        const updated = {
+          ...existing,
+          title: entryTitle.value,
+          body: entryBody.innerHTML,
+          fontFamily: fontFamilySelect.value,
+          fontSize: fontSizeSelect.value,
+          updatedAt: Date.now()
+        };
+        await dbPut(updated);
+        entries = await dbGetAll();
+        renderEntriesList();
+        document.getElementById("save-status").textContent = "Saved locally";
+      }, 400);
+    }
+
+    // --- ENTER KEY FIX FOR TITLE & WRITING AREA ---
+    entryTitle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        entryBody.focus();
+      }
+    });
+
+    function createTodoElement(text = "") {
+      const row = document.createElement("div");
+      row.className = "todo-item";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.setAttribute("contenteditable", "false");
+
+      const span = document.createElement("span");
+      span.className = "todo-text";
+      span.textContent = text;
+
+      row.appendChild(cb);
+      row.appendChild(span);
+      return { row, span };
+    }
+
+    function focusNodeAtStart(node) {
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(node);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    entryBody.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        const anchor = sel.anchorNode;
+        const currentTodo = anchor.nodeType === 1
+          ? anchor.closest(".todo-item")
+          : anchor.parentElement?.closest(".todo-item");
+
+        if (currentTodo) {
+          e.preventDefault();
+          const currentText = currentTodo.querySelector(".todo-text, span")?.textContent.trim() || "";
+
+          // If current checkbox is empty, exit checklist into a normal new line
+          if (currentText === "" || currentText === "Task item...") {
+            const normalLine = document.createElement("div");
+            normalLine.innerHTML = "<br>";
+            currentTodo.replaceWith(normalLine);
+            focusNodeAtStart(normalLine);
+          } else {
+            // Create next checkbox item right below
+            const { row, span } = createTodoElement("");
+            currentTodo.insertAdjacentElement("afterend", row);
+            focusNodeAtStart(span);
+          }
+          scheduleAutoSave();
+        }
+      }
+    });
+
+    // Clicking empty space below text focuses editor cleanly
+    document.getElementById("writing-scroll-area").addEventListener("click", (e) => {
+      if (e.target.id === "writing-scroll-area") {
+        entryBody.focus();
+      }
+    });
+
+    // --- FONT & SIZE CONTROLS ---
+    fontFamilySelect.onchange = () => {
+      entryBody.style.fontFamily = fontFamilySelect.value;
+      scheduleAutoSave();
+    };
+
+    fontSizeSelect.onchange = () => {
+      entryBody.style.fontSize = fontSizeSelect.value;
+      scheduleAutoSave();
+    };
+
+    // --- CHECKBOX BUTTON INSERTION ---
+    function insertCheckboxRow() {
+      entryBody.focus();
+      const { row, span } = createTodoElement("Task item...");
+
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0 && entryBody.contains(sel.anchorNode)) {
+        const range = sel.getRangeAt(0);
+        const existingTodo = (range.startContainer.nodeType === 1
+          ? range.startContainer
+          : range.startContainer.parentElement)?.closest(".todo-item");
+
+        if (existingTodo) {
+          existingTodo.insertAdjacentElement("afterend", row);
+        } else {
+          range.collapse(false);
+          range.insertNode(row);
+        }
+      } else {
+        entryBody.appendChild(row);
+      }
+
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+      scheduleAutoSave();
+    }
+
+    document.getElementById("add-checkbox-btn").onclick = insertCheckboxRow;
+
+    entryBody.addEventListener("change", (e) => {
+      if (e.target && e.target.type === "checkbox") {
+        const row = e.target.closest(".todo-item");
+        if (row) row.classList.toggle("checked", e.target.checked);
+        scheduleAutoSave();
+      }
+    });
+
+    // --- INSERT IMAGE INTO ENTRY ---
+    document.getElementById("insert-image-input").onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const imgObj = new Image();
+        imgObj.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxWidth = 900;
+          const scale = Math.min(1, maxWidth / imgObj.width);
+          canvas.width = imgObj.width * scale;
+          canvas.height = imgObj.height * scale;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(imgObj, 0, 0, canvas.width, canvas.height);
+
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.82);
+          const imgEl = document.createElement("img");
+          imgEl.src = compressedDataUrl;
+
+          entryBody.focus();
+          entryBody.appendChild(imgEl);
+          const br = document.createElement("div");
+          br.innerHTML = "<br>";
+          entryBody.appendChild(br);
+          focusNodeAtStart(br);
+          scheduleAutoSave();
+        };
+        imgObj.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    };
+
+    // --- RENDER LIBRARY LIST ---
+    function renderEntriesList() {
+      const search = document.getElementById("search-input").value.toLowerCase();
+      const list = document.getElementById("entries-list");
+      list.innerHTML = "";
+
+      entries
+        .filter(e => (e.title + " " + e.body).toLowerCase().includes(search))
+        .forEach(entry => {
+          const btn = document.createElement("button");
+          const isActive = entry.id === activeEntryId;
+          btn.className = `w-full text-left p-3 rounded-xl transition cursor-pointer ${isActive ? "bg-card shadow-sm border border-theme" : "hover:opacity-80"}`;
+          const hasImage = entry.body.includes("<img");
+          const plainText = entry.body.replace(/<[^>]*>?/gm, " ").trim().slice(0, 50) || (hasImage ? "📷 Photo memory" : "Empty capsule...");
+          btn.innerHTML = `
+            <div class="flex items-center justify-between text-[11px] text-muted mb-1">
+              <span>${entry.createdAt}</span>
+              ${hasImage ? '<span>🖼️</span>' : ''}
+            </div>
+            <div class="font-medium text-sm text-main truncate">${entry.title || "Untitled Capsule"}</div>
+            <div class="text-xs text-muted truncate mt-0.5">${plainText}</div>
+          `;
+          btn.onclick = () => selectEntry(entry.id);
+          list.appendChild(btn);
+        });
+    }
+
+    // Event Listeners
+    document.getElementById("new-entry-btn").onclick = createNewEntry;
+    entryTitle.oninput = scheduleAutoSave;
+    entryBody.oninput = scheduleAutoSave;
+    document.getElementById("search-input").oninput = renderEntriesList;
+
+    document.getElementById("delete-entry-btn").onclick = async () => {
+      if (!activeEntryId) return;
+      await dbDelete(activeEntryId);
+      entries = await dbGetAll();
+      if (entries.length === 0) await createNewEntry();
+      else selectEntry(entries[0].id);
+    };
+
+    // Export Backup
+    document.getElementById("export-btn").onclick = () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries, null, 2));
+      const a = document.createElement("a");
+      a.href = dataStr;
+      a.download = `the-capsule-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    };
+
+    // Import Backup
+    document.getElementById("import-input").onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const imported = JSON.parse(ev.target.result);
+        for (const item of imported) await dbPut(item);
+        entries = await dbGetAll();
+        if (entries.length > 0) selectEntry(entries[0].id);
+      };
+      reader.readAsText(file);
+    };
+  </script>
+</body>
+</html>
